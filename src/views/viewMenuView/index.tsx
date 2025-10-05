@@ -1,13 +1,27 @@
 "use client"
 
-import Link from "next/link";
+import NavbarComponent from "@/components/navbar";
 
 const ViewMenuView = () => {
+
     return <div>
+        <NavbarComponent></NavbarComponent>
+        <div>
+            <h1>Selecciona un menú</h1>
+            <table>
+                <tr>
+                    <th>#</th>
+                    <th>Nombre</th>
+                    <th>Acciones</th>
+                </tr>
+                {
 
-        <Link href={"/"}>VOLVER</Link>
+                }
+            </table>
+        </div>
 
-        VIEW MENU</div>
+
+    </div>
 }
 
 export default ViewMenuView;
