@@ -23,6 +23,8 @@ const HomeView = () => {
                                 <p className="md:text-[32px] text-[24px] text-center">Gestionar menús</p>
                             </div>
                         </Link>
+                        <Link href={"/chat-bot"}>Chat bot</Link>
+
                     </div>
                 </div>
             </div>
