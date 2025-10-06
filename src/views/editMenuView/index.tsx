@@ -1,11 +1,15 @@
 "use client"
 
-import Link from "next/link";
+import NavbarComponent from "@/components/navbar";
 
 const EditMenuView = () => {
     return <div>
-        <Link href={"/"}>VOLVER</Link>
-        EDIT MENU
+        <NavbarComponent></NavbarComponent>
+        <div className="w-full flex justify-center mt-8">
+            <h1 className="text-center font-bold text-[48px]">
+                Here comes the edit view...
+            </h1>
+        </div>
     </div>
 }
 
