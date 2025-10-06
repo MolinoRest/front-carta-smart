@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { chatApi } from "./services/chat.api";
+import NavbarComponent from "@/components/navbar";
 
 type Msg = { role: "user" | "assistant"; content: string };
 type Dish = {
@@ -34,8 +35,9 @@ function findDishByName(name: string) {
 
 export default function ChatBotView() {
   const [messages, setMessages] = useState<Msg[]>([
-    { role: "assistant", content:
-      "¡Hola! Soy tu asistente de pedidos. Escribe /menu para ver el menú, /carrito para ver tu pedido, /vaciar para empezar de cero y /confirmar cuando quieras finalizar."
+    {
+      role: "assistant", content:
+        "¡Hola! Soy tu asistente de pedidos. Escribe /menu para ver el menú, /carrito para ver tu pedido, /vaciar para empezar de cero y /confirmar cuando quieras finalizar."
     }
   ]);
   const [input, setInput] = useState("");
@@ -58,7 +60,7 @@ export default function ChatBotView() {
     const byCat: Record<Dish["category"], Dish[]> = { Entradas: [], Fondos: [], Bebidas: [], Postres: [] };
     MENU.forEach(d => byCat[d.category].push(d));
     const lines: string[] = [];
-    (["Entradas","Fondos","Bebidas","Postres"] as Dish["category"][]).forEach(cat => {
+    (["Entradas", "Fondos", "Bebidas", "Postres"] as Dish["category"][]).forEach(cat => {
       lines.push(`*${cat}*`);
       byCat[cat].forEach(d => lines.push(`- ${d.name} — ${currency(d.price)}`));
       lines.push("");
@@ -226,39 +228,44 @@ export default function ChatBotView() {
   }
 
   return (
-    <div style={{ maxWidth: 800, margin: "32px auto", padding: 16 }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12 }}>
-        <Link href="/">VOLVER</Link>
-        <h1 style={{ margin: 0 }}>Asistente de Pedidos (solo chat)</h1>
-      </div>
+    <div>
+      <NavbarComponent></NavbarComponent>
+      <div style={{ maxWidth: 800, margin: "32px auto", padding: 16 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12 }}>
+          <h1 style={{ margin: 0 }}>Asistente de Pedidos (solo chat)</h1>
+        </div>
 
-      <div ref={viewportRef} style={{ border: "1px solid #e5e7eb", borderRadius: 12, padding: 12, height: 520, overflowY: "auto", background: "#fafafa" }}>
-        {messages.map((m, i) => (
-          <div key={i} style={{ display: "flex", justifyContent: m.role === "user" ? "flex-end" : "flex-start", margin: "8px 0" }}>
-            <div style={{ maxWidth: "85%", padding: "10px 12px", borderRadius: 12, whiteSpace: "pre-wrap",
-              background: m.role === "user" ? "#2563eb" : "white", color: m.role === "user" ? "white" : "black",
-              boxShadow: "0 1px 2px rgba(0,0,0,0.06)" }}>
-              {m.content}
+        <div ref={viewportRef} style={{ border: "1px solid #e5e7eb", borderRadius: 12, padding: 12, height: 520, overflowY: "auto", background: "#fafafa" }}>
+          {messages.map((m, i) => (
+            <div key={i} style={{ display: "flex", justifyContent: m.role === "user" ? "flex-end" : "flex-start", margin: "8px 0" }}>
+              <div style={{
+                maxWidth: "85%", padding: "10px 12px", borderRadius: 12, whiteSpace: "pre-wrap",
+                background: m.role === "user" ? "#2563eb" : "white", color: m.role === "user" ? "white" : "black",
+                boxShadow: "0 1px 2px rgba(0,0,0,0.06)"
+              }}>
+                {m.content}
+              </div>
             </div>
-          </div>
-        ))}
-        {loading && <p style={{ opacity: 0.7 }}>pensando…</p>}
-      </div>
+          ))}
+          {loading && <p style={{ opacity: 0.7 }}>pensando…</p>}
+        </div>
 
-      <form onSubmit={sendMessage} style={{ marginTop: 12, display: "flex", gap: 8 }}>
-        <textarea
-          value={input}
-          onChange={e => setInput(e.target.value)}
-          onKeyDown={onKeyDown}
-          placeholder="Ej.: 2 Lomo Saltado y 1 Chicha Morada /menu /carrito /vaciar /confirmar"
-          rows={2}
-          style={{ flex: 1, resize: "none", padding: 10, borderRadius: 8, border: "1px solid #e5e7eb" }}
-        />
-        <button type="submit" disabled={loading || input.trim().length === 0}
-          style={{ padding: "0 16px", borderRadius: 8, border: "1px solid #e5e7eb", minWidth: 100 }}>
-          {loading ? "Enviando…" : "Enviar"}
-        </button>
-      </form>
+        <form onSubmit={sendMessage} style={{ marginTop: 12, display: "flex", gap: 8 }}>
+          <textarea
+            value={input}
+            onChange={e => setInput(e.target.value)}
+            onKeyDown={onKeyDown}
+            placeholder="Ej.: 2 Lomo Saltado y 1 Chicha Morada /menu /carrito /vaciar /confirmar"
+            rows={2}
+            style={{ flex: 1, resize: "none", padding: 10, borderRadius: 8, border: "1px solid #000000" }}
+          />
+          <button type="submit" disabled={loading || input.trim().length === 0}
+            style={{ padding: "0 16px", borderRadius: 8, border: "1px solid #000000", minWidth: 100 }}>
+            {loading ? "Enviando…" : "Enviar"}
+          </button>
+        </form>
+      </div>
     </div>
+
   );
 }

@@ -23,8 +23,11 @@ const HomeView = () => {
                                 <p className="md:text-[32px] text-[24px] text-center">Gestionar menús</p>
                             </div>
                         </Link>
-                        <Link href={"/chat-bot"}>Chat bot</Link>
-
+                        <Link href={"/chat-bot"}>
+                            <div className="border-2 rounded-2xl border-gray-600 px-3 py-1 hover:bg-[#f7ac29] transition-colors duration-300 ease-in-out md:min-w-[300px] min-w-[250px]">
+                                <p className="md:text-[32px] text-[24px] text-center">Chat bot</p>
+                            </div>
+                        </Link>
                     </div>
                 </div>
             </div>

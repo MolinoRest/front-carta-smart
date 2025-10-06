@@ -6,18 +6,9 @@ const ViewMenuView = () => {
 
     return <div>
         <NavbarComponent></NavbarComponent>
-        <div>
-            <h1>Selecciona un menú</h1>
-            <table>
-                <tr>
-                    <th>#</th>
-                    <th>Nombre</th>
-                    <th>Acciones</th>
-                </tr>
-                {
-
-                }
-            </table>
+        <div className="flex w-full justify-center flex-col space-y-2 mt-8">
+            <h1 className="font-bold text-[48px] text-center">Selecciona un menú</h1>
+            <h2 className="text-[24px] text-center">Here you choose and review menus...</h2>
         </div>
 
 

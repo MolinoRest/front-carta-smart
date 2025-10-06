@@ -2,7 +2,7 @@ import Link from "next/link";
 
 const NavbarComponent = () => {
   const items = [
-    { text: "Ver menús", path: "/view-menu" }, { text: "Editar menús", path: "/edit-menu" }
+    { text: "Ver menús", path: "/view-menu" }, { text: "Editar menús", path: "/edit-menu" }, { text: "ChatBot", path: "/chat-bot" }
   ]
   return <div className="w-full px-8 pt-8 flex flex-row justify-between">
     <div className="">
