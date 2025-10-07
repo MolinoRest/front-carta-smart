@@ -191,9 +191,8 @@ export default function ChatBotView() {
       const systemPrompt =
         "Eres un asistente de pedidos para un restaurante. Interactúas SOLO por chat. " +
         "Si el cliente solicita agregar, quitar, vaciar o confirmar, responde normalmente y, " +
-        "AL FINAL de tu mensaje agrega un bloque de código con el lenguaje 'order' que contenga un JSON con la acción. " +
-        "Formato: ```order\n{ \"op\":\"add|remove|clear|confirm\", \"item\":\"Nombre exacto del menú\", \"qty\":N }\n``` " +
-        "Si no hay cambios en carrito, no incluyas ningún bloque 'order'. " +
+        "AL FINAL de tu mensaje agrega el estado del carrito de compras" +
+        "Si no hay cambios en carrito, no incluyas nada. " +
         "Pide datos de entrega (nombre y teléfono) solo cuando el cliente quiera confirmar.";
 
       const shortMenu = MENU.map(d => ({ name: d.name, price: d.price, category: d.category }));
