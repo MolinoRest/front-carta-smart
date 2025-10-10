@@ -13,9 +13,9 @@ export async function chatCompletion(
   opts?: { model?: string; temperature?: number; max_tokens?: number }
 ) {
   const completion = await client.chat.completions.create({
-    model: opts?.model ?? "gpt-4o-mini",
+    model: opts?.model ?? "gpt-4o",
     messages,
-    temperature: opts?.temperature ?? 0.7,
+    temperature: opts?.temperature ?? 0.3,
     ...(opts?.max_tokens ? { max_tokens: opts.max_tokens } : {}),
   });
   return completion.choices[0]?.message?.content ?? "";
