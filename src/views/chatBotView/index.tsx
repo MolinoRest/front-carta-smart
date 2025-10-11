@@ -139,14 +139,14 @@ export default function ChatBotView() {
       return Array.isArray(p) ? p : [p];
     };
 
-    try { return toArr(raw.trim()); } catch {}
-    try { return toArr(norm(raw.trim())); } catch {}
+    try { return toArr(raw.trim()); } catch { }
+    try { return toArr(norm(raw.trim())); } catch { }
 
     const out: Action[] = [];
     for (const line of raw.split(/\r?\n/)) {
       const l = line.trim(); if (!l) continue;
-      try { out.push(...toArr(l)); continue; } catch {}
-      try { out.push(...toArr(norm(l))); } catch {}
+      try { out.push(...toArr(l)); continue; } catch { }
+      try { out.push(...toArr(norm(l))); } catch { }
     }
     return out;
   }
@@ -219,13 +219,13 @@ export default function ChatBotView() {
         const p = JSON.parse(x);
         return Array.isArray(p) ? p : [p];
       };
-      try { return tryParse(s); } catch {}
-      try { return tryParse(normalize(s)); } catch {}
+      try { return tryParse(s); } catch { }
+      try { return tryParse(normalize(s)); } catch { }
       const out: any[] = [];
       for (const line of s.split(/\r?\n/)) {
         const l = line.trim(); if (!l) continue;
-        try { out.push(JSON.parse(l)); continue; } catch {}
-        try { out.push(JSON.parse(normalize(l))); } catch {}
+        try { out.push(JSON.parse(l)); continue; } catch { }
+        try { out.push(JSON.parse(normalize(l))); } catch { }
       }
       return out;
     };
@@ -484,7 +484,7 @@ export default function ChatBotView() {
       const orderParsed = parseActions(orderRaw);
       const pendingRaw = extractFence(reply, "pending");
       const pendingParsed = parseActions(pendingRaw);
-      console.log("RESPUESTA" , reply);
+      console.log("RESPUESTA", reply);
       console.log("LLM_ORDER_RAW:", orderRaw);
       console.log("LLM_ORDER_PARSED:", orderParsed);
       console.log("LLM_PENDING_RAW:", pendingRaw);
@@ -575,7 +575,7 @@ export default function ChatBotView() {
                 maxWidth: "85%", padding: "10px 12px", borderRadius: 12, whiteSpace: "pre-wrap",
                 background: m.role === "user" ? "#2563eb" : "white", color: m.role === "user" ? "white" : "black",
                 boxShadow: "0 1px 2px rgba(0,0,0,0.06)"
-              }}>e
+              }}>
                 {m.content}
               </div>
             </div>
