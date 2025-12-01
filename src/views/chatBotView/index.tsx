@@ -50,6 +50,133 @@ export default function ChatBotView() {
   const [cart, setCart] = useState<Record<string, CartItem>>({});
   const [pendingActions, setPendingActions] = useState<Action[] | null>(null);
 
+  // ====== AUDIO: ESTADOS ======
+  const [audioState, setAudioState] = useState<
+      "idle" | "recording" | "processing" | "playing"
+  >("idle");
+
+  const [recording, setRecording] = useState(false);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunks = useRef<Blob[]>([]);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+
+// ====== BOTÓN BONITO CON ICONOS DINÁMICOS ======
+  function AudioButton() {
+
+    const isDisabled = audioState === "processing";
+
+    let icon = "🎤";
+    let label = "Grabar";
+    let style: any = {
+      padding: "10px 16px",
+      borderRadius: 12,
+      border: "1px solid #000",
+      minWidth: 120,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 8,
+      cursor: isDisabled ? "not-allowed" : "pointer",
+      background: "white"
+    };
+
+    if (audioState === "recording") {
+      icon = "⏹️";
+      label = "Detener";
+      style.background = "#ff4d4d";
+      style.border = "1px solid #b30000";
+      style.color = "white";
+    }
+
+    if (audioState === "processing") {
+      icon = "⏳";
+      label = "Procesando…";
+      style.background = "#f3f3f3";
+      style.border = "1px solid #ccc";
+      style.color = "#555";
+    }
+
+    if (audioState === "playing") {
+      icon = "🔊";
+      label = "Hablando…";
+      style.background = "#e8f5ff";
+      style.border = "1px solid #68a3ff";
+      style.color = "#0051c7";
+    }
+
+    return (
+        <button
+            type="button"
+            onClick={startRecording}
+            disabled={isDisabled}
+            style={style}
+        >
+          {icon} {label}
+        </button>
+    );
+  }
+
+
+// ====== START RECORDING (MEJORADO) ======
+  async function startRecording() {
+    if (!recording) {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const mediaRecorder = new MediaRecorder(stream);
+
+        mediaRecorderRef.current = mediaRecorder;
+        audioChunks.current = [];
+
+        mediaRecorder.onstart = () => {
+          setAudioState("recording");
+        };
+
+        mediaRecorder.ondataavailable = e => audioChunks.current.push(e.data);
+
+        mediaRecorder.onstop = async () => {
+          setAudioState("processing");
+
+          const blob = new Blob(audioChunks.current, { type: "audio/webm" });
+
+          await uploadAudioToTranscriber(blob);
+        };
+
+        mediaRecorder.start();
+        setRecording(true);
+      } catch (err) {
+        console.error("Mic no permitido:", err);
+      }
+
+    } else {
+      mediaRecorderRef.current?.stop();
+      setRecording(false);
+    }
+  }
+
+// ====== ANIMACIÓN (OPCIONAL) ======
+  function RecordingAnimation() {
+    if (audioState !== "recording") return null;
+
+    return (
+        <div style={{
+          display: "flex",
+          gap: 6,
+          alignItems: "center",
+          marginLeft: 4,
+        }}>
+          <div style={{
+            width: 10,
+            height: 10,
+            background: "red",
+            borderRadius: "50%",
+            animation: "pulse 0.7s infinite alternate",
+          }} />
+          <span style={{ color: "red", fontSize: 13 }}>Grabando…</span>
+        </div>
+    );
+  }
+
   useEffect(() => {
     viewportRef.current?.scrollTo({ top: viewportRef.current.scrollHeight });
   }, [messages, loading]);
@@ -70,6 +197,108 @@ export default function ChatBotView() {
       lines.push("");
     });
     return lines.join("\n");
+  }
+
+  async function sendMessageFromText(text: string) {
+    setMessages(prev => [...prev, { role: "user", content: text }]);
+    setInput("");
+    await callAssistant([
+      ...messages,
+      { role: "user", content: text }
+    ]);
+  }
+
+  async function uploadAudioToTranscriber(blobOrFile: Blob | File) {
+    const formData = new FormData();
+    formData.append("file", blobOrFile, "audio.webm");
+
+    try {
+      const res = await fetch("https://carta-smart-api-31496243302.europe-west1.run.app/transcribe", {
+        method: "POST",
+        body: formData
+      });
+
+      const data = await res.json();
+
+      if (data.text) {
+        await sendMessageFromText(data.text);
+      }
+
+    } catch (err) {
+      console.error(err);
+      setMessages(prev => [
+        ...prev,
+        { role: "assistant", content: "Error transcribiendo audio" }
+      ]);
+    }
+  }
+
+  async function uploadAudioToWebhook(blobOrFile: Blob | File) {
+    const formData = new FormData();
+    formData.append("file", blobOrFile, "audio.m4a");
+
+    try {
+      await fetch("http://localhost:5678/webhook-test/pedido/audio", {
+        method: "POST",
+        body: formData
+      });
+
+      setMessages(prev => [
+        ...prev,
+        { role: "assistant", content: "Audio enviado correctamente." }
+      ]);
+
+    } catch (err) {
+      console.error(err);
+      setMessages(prev => [
+        ...prev,
+        { role: "assistant", content: "Error enviando audio" }
+      ]);
+    }
+  }
+
+  async function startRecording() {
+    // Iniciar grabación
+    if (!recording) {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const mediaRecorder = new MediaRecorder(stream);
+
+        mediaRecorderRef.current = mediaRecorder;
+        audioChunks.current = [];
+
+        mediaRecorder.onstart = () => {
+          setAudioState("recording");
+          setRecording(true);
+        };
+
+        mediaRecorder.ondataavailable = e => audioChunks.current.push(e.data);
+
+        mediaRecorder.onstop = async () => {
+          setAudioState("processing");
+          setRecording(false);
+
+          const blob = new Blob(audioChunks.current, { type: "audio/webm" });
+          await uploadAudioToTranscriber(blob);
+
+          setAudioState("idle");
+        };
+
+        mediaRecorder.start();
+      } catch (err) {
+        console.error("Mic error:", err);
+      }
+
+      // Detener grabación
+    } else {
+      mediaRecorderRef.current?.stop();
+    }
+  }
+
+  function onAudioSelected(e) {
+    if (e.target.files?.length) {
+      uploadAudioToTranscriber(e.target.files[0]);
+    }
   }
 
   function renderCartMarkdown(cartObj: Record<string, CartItem>) {
@@ -312,6 +541,25 @@ export default function ChatBotView() {
     await callAssistant(next);
   }
 
+  async function speak(text: string) {
+    try {
+      const res = await fetch("https://carta-smart-api-31496243302.europe-west1.run.app/tts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text })
+      });
+
+      const data = await res.json();
+
+      if (data.audio_base64) {
+        const audio = new Audio(`data:audio/mp3;base64,${data.audio_base64}`);
+        audio.play();
+      }
+    } catch (err) {
+      console.error("Error reproduciendo audio:", err);
+    }
+  }
+
   // ======= callAssistant con prompt reforzado + logging =======
   async function callAssistant(nextMessages: Msg[]) {
     setLoading(true);
@@ -499,6 +747,7 @@ export default function ChatBotView() {
       // 3) Texto limpio
       const cleanReply = stripInternalBlocks(reply);
       setMessages(prevMsgs => [...prevMsgs, { role: "assistant", content: cleanReply || "¿A qué producto te refieres?" }]);
+      speak(cleanReply);
     } catch {
       setMessages(prev => [...prev, { role: "assistant", content: "Error al contactar al servicio." }]);
     } finally {
@@ -584,16 +833,21 @@ export default function ChatBotView() {
         </div>
 
         <form onSubmit={sendMessage} style={{ marginTop: 12, display: "flex", gap: 8 }}>
-          <textarea
-            value={input}
-            onChange={e => setInput(e.target.value)}
-            onKeyDown={onKeyDown}
-            placeholder="Ej.: 2 Lomo Saltado y 1 Chicha Morada /menu /carrito /vaciar /confirmar"
-            rows={2}
-            style={{ flex: 1, resize: "none", padding: 10, borderRadius: 8, border: "1px solid #000000" }}
-          />
-          <button type="submit" disabled={loading || input.trim().length === 0}
-            style={{ padding: "0 16px", borderRadius: 8, border: "1px solid #000000", minWidth: 100 }}>
+  <textarea
+      value={input}
+      onChange={e => setInput(e.target.value)}
+      onKeyDown={onKeyDown}
+      placeholder="Ej.: 2 Lomo Saltado y 1 Chicha Morada /menu /carrito /vaciar /confirmar"
+      rows={2}
+      style={{ flex: 1, resize: "none", padding: 10, borderRadius: 8, border: "1px solid #000000" }}
+  />
+
+          <AudioButton />
+          <RecordingAnimation />
+
+          <button type="submit"
+                  disabled={loading || input.trim().length === 0}
+                  style={{ padding: "0 16px", borderRadius: 8, border: "1px solid #000000", minWidth: 100 }}>
             {loading ? "Enviando…" : "Enviar"}
           </button>
         </form>
