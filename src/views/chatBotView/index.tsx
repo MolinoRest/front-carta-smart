@@ -176,7 +176,7 @@ export default function ChatBotView() {
     formData.append("file", blobOrFile, "audio.webm");
 
     try {
-      const res = await fetch("https://carta-smart-api-31496243302.europe-west1.run.app/transcribe", {
+      const res = await fetch("https://carta-smart-api-31496243302.europe-west1.run.app/transcribe/", {
         method: "POST",
         body: formData
       });
@@ -500,7 +500,7 @@ export default function ChatBotView() {
 
   async function speak(text: string) {
     try {
-      const res = await fetch("https://carta-smart-api-31496243302.europe-west1.run.app/tts", {
+      const res = await fetch("https://carta-smart-api-31496243302.europe-west1.run.app/tts/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ text })
