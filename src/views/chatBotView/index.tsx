@@ -258,12 +258,6 @@ export default function ChatBotView() {
     }
   }
 
-  function onAudioSelected(e) {
-    if (e.target.files?.length) {
-      uploadAudioToTranscriber(e.target.files[0]);
-    }
-  }
-
   function renderCartMarkdown(cartObj: Record<string, CartItem>) {
     const items = Object.values(cartObj || {});
     if (!items.length) return "_Carrito vacío_";
