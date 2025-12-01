@@ -117,43 +117,6 @@ export default function ChatBotView() {
     );
   }
 
-
-// ====== START RECORDING (MEJORADO) ======
-  async function startRecording() {
-    if (!recording) {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        const mediaRecorder = new MediaRecorder(stream);
-
-        mediaRecorderRef.current = mediaRecorder;
-        audioChunks.current = [];
-
-        mediaRecorder.onstart = () => {
-          setAudioState("recording");
-        };
-
-        mediaRecorder.ondataavailable = e => audioChunks.current.push(e.data);
-
-        mediaRecorder.onstop = async () => {
-          setAudioState("processing");
-
-          const blob = new Blob(audioChunks.current, { type: "audio/webm" });
-
-          await uploadAudioToTranscriber(blob);
-        };
-
-        mediaRecorder.start();
-        setRecording(true);
-      } catch (err) {
-        console.error("Mic no permitido:", err);
-      }
-
-    } else {
-      mediaRecorderRef.current?.stop();
-      setRecording(false);
-    }
-  }
-
 // ====== ANIMACIÓN (OPCIONAL) ======
   function RecordingAnimation() {
     if (audioState !== "recording") return null;
